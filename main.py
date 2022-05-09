@@ -3,6 +3,7 @@ import logging
 from exchanges.binance import BinanceClient
 from exchanges.ftx import FtxClient
 from exchanges.kucoin import KucoinClient
+from exchanges.coinbase import CoinbaseClient
 from data_collector import collect_all
 
 logger = logging.getLogger()
@@ -28,16 +29,18 @@ if __name__ == "__main__":
 
     while True:
         exchange = input("Choose an exchange: ").lower()
-        if exchange in ["ftx", "binance", "kucoin"]:
+        if exchange in ["ftx", "binance", "kucoin", "coinbase"]:
             break
 
     if exchange == "binance":
         client = BinanceClient(True)
     elif exchange == "ftx":
-        client = FtxClient()
-        
+        client = FtxClient()  
     elif exchange == "kucoin":
         client = KucoinClient(False)
+    elif exchange == "coinbase":
+        client = CoinbaseClient()
+    print(client.get_historical_data("BTCEUR"))
         
 
     while True:
