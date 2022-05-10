@@ -12,6 +12,7 @@ class KucoinClient:
     def __init__(self, futures: bool):
 
         self.futures = futures
+        self.platform = "kucoin"
 
         if self.futures:
             self._base_url = "https://api-futures.kucoin.com"
@@ -52,7 +53,7 @@ class KucoinClient:
             
             params = dict()
             params["symbol"] = symbol
-            params["type"] = "1min"
+            params["type"] = "6hour"
 
             if start_time is not None:
                 params["startAt"] = start_time
@@ -67,7 +68,7 @@ class KucoinClient:
 
             if raw_candles is not None:
                 for c in raw_candles['data']:
-                    candles.append((float(c[0]), float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5]),))
+                    candles.append((float(c[0])*1000, float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5]),))
                 return candles
             else: 
                 return None

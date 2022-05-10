@@ -11,6 +11,7 @@ logger = logging.getLogger()
 class FtxClient:
     def __init__(self):
         self._base_url = "https://ftx.com/api"
+        self.platform = "ftx"
 
         self.symbols = self._get_symbols()
 

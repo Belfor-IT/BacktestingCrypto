@@ -16,6 +16,8 @@ class BinanceClient:
             self._base_url = "https://fapi.binance.com"
         else:
             self._base_url = "https://api.binance.com"
+        
+        self.platform = "binance"
 
         self.symbols = self._get_symbols()
 

@@ -1,4 +1,5 @@
 import logging
+import time
 
 from exchanges.binance import BinanceClient
 from exchanges.ftx import FtxClient
@@ -34,13 +35,14 @@ if __name__ == "__main__":
 
     if exchange == "binance":
         client = BinanceClient(True)
+        #print(client.get_historical_data("BTCUSDT"))
     elif exchange == "ftx":
         client = FtxClient()  
     elif exchange == "kucoin":
         client = KucoinClient(False)
     elif exchange == "coinbase":
         client = CoinbaseClient()
-    print(client.get_historical_data("BTCEUR"))
+    
         
 
     while True:
