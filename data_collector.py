@@ -21,9 +21,6 @@ def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient, CoinbaseCl
     h5_db.create_dataset(symbol)
     client = client
 
-    print(h5_db.get_data(symbol, from_time=0, to_time=int(time.time()* 1000)))
-    
-
     oldest_ts, most_recent_ts = h5_db.get_first_last_timestamp(symbol)
 
     # Initial Request
@@ -48,6 +45,7 @@ def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient, CoinbaseCl
         most_recent_ts = data[-1][0]
 
         h5_db.write_data(symbol, data)
+    data_to_insert = []
 
     # Most recent data
 
@@ -64,15 +62,22 @@ def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient, CoinbaseCl
 
         data = data[:-1]
 
+        data_to_insert = data_to_insert + data
+
+        if len(data_to_insert) > 10000:
+            h5_db.write_data(symbol, data_to_insert)
+            data_to_insert.clear()
+
         if data[-1][0] > most_recent_ts:
             most_recent_ts = data[-1][0]
 
         logger.info("%s %s: Collected %s recent data from %s to %s", exchange, symbol, len(data),
                     ms_to_dt(data[0][0]), ms_to_dt(data[-1][0]))
 
-        h5_db.write_data(symbol, data)
-
         time.sleep(1.1)
+
+    h5_db.write_data(symbol, data_to_insert)
+    data_to_insert.clear()
 
     # Older data
 
@@ -89,12 +94,18 @@ def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient, CoinbaseCl
                         ms_to_dt(oldest_ts))
             break
 
+        data_to_insert = data_to_insert + data
+
+        if len(data_to_insert) > 10000:
+            h5_db.write_data(symbol, data_to_insert)
+            data_to_insert.clear()
+
         if data[0][0] < oldest_ts:
             oldest_ts = data[0][0]
 
         logger.info("%s %s: Collected %s older data from %s to %s", exchange, symbol, len(data),
                     ms_to_dt(data[0][0]), ms_to_dt(data[-1][0]))
 
-        h5_db.write_data(symbol, data)
-
         time.sleep(1.1)
+
+    h5_db.write_data(symbol, data_to_insert)

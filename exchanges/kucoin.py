@@ -53,7 +53,7 @@ class KucoinClient:
             
             params = dict()
             params["symbol"] = symbol
-            params["type"] = "6hour"
+            params["type"] = "15min"
 
             if start_time is not None:
                 params["startAt"] = start_time
@@ -68,7 +68,7 @@ class KucoinClient:
 
             if raw_candles is not None:
                 for c in raw_candles['data']:
-                    candles.append((float(c[0])*1000, float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5]),))
+                    candles.append((float(c[0])*1000, float(c[1]), float(c[3]), float(c[4]), float(c[2]), float(c[5]),))
                 return candles
             else: 
                 return None

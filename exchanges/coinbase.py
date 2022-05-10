@@ -61,7 +61,7 @@ class CoinbaseClient:
 
         if raw_candles is not None:
             for c in raw_candles:
-                candles.append((float(c[0]), float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5]),))
+                candles.append((float(c[0]), float(c[3]), float(c[2]), float(c[1]), float(c[4]), float(c[5]),))
             return candles
         else: 
             return None
