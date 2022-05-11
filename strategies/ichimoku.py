@@ -85,7 +85,12 @@ def backtest(df: pd.DataFrame, tenkan_period: int, kijun_period: int):
     #shift next candle to calculate the pnl 
     signal_data["pnl"] = signal_data["close"].pct_change() * signal_data["signal"].shift(1)
 
-    return signal_data["pnl"].sum()
+    df["cum_pnl"] = df["pnl"].cumsum()
+    df["max_cum_pnl"] = df["cum_pnl"].cummax()
+    df["drawdown"] = df["max_cum_pnl"] - df["cum_pnl"]
+
+    return df["pnl"].sum(), df["drawdown"].max()
+
 
 
 
