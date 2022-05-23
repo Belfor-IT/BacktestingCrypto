@@ -1,16 +1,21 @@
 import datetime
-import requests
 import time
-
-import numpy as np
+import requests
 import pandas as pd
+import numpy as np
+from math import floor
+from termcolor import colored as cl
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn import datasets, linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 
-%matplotlib inline
+plt.rcParams['figure.figsize'] = (20, 10)
+plt.style.use('fivethirtyeight')
+plt.figure(figsize=(12,10))
+pd.set_option("display.max_rows", None, "display.max_columns", None)
+
 
 
 def get_market_data(market, granularity):
@@ -22,27 +27,61 @@ def get_market_data(market, granularity):
         df = df.iloc[::-1].reset_index()
         return df
 
-        df = get_market_data('BTC-GBP', 86400)
+def get_local_data(Data_csv):
+    df = pd.read_csv(Data_csv)
+    return df
 
-        df.head()
+
+def get_macd(price, slow, fast, smooth):
+    exp1 = price.ewm(span = fast, adjust = False).mean()
+    exp2 = price.ewm(span = slow, adjust = False).mean()
+    macd = pd.DataFrame(exp1 - exp2).rename(columns = {'close':'macd'})
+    signal = pd.DataFrame(macd.ewm(span = smooth, adjust = False).mean()).rename(columns = {'macd':'signal'})
+    hist = pd.DataFrame(macd['macd'] - signal['signal']).rename(columns = {0:'hist'})
+    frames =  [macd, signal, hist]
+    df = pd.concat(frames, join = 'inner', axis = 1)
+    return df
 
 
-sns.set(font_scale=1.5)
-plt.figure(figsize=(12,10))
-rp = sns.regplot(x=df.index, y='close', data=df, ci=None, color='r')
 
-y_rp = rp.get_lines()[0].get_ydata()
-x_rp = rp.get_lines()[0].get_xdata()
-sns.lineplot(x=x_rp, y=y_rp + np.std(y_rp), color='b')
-sns.lineplot(x=x_rp, y=y_rp - np.std(y_rp), color='b')
+def plot_macd(prices, macd, signal, hist, df):
+    ax1 = plt.subplot2grid((8,1), (0,0), rowspan = 5, colspan = 1)
+    ax2 = plt.subplot2grid((8,1), (5,0), rowspan = 3, colspan = 1)
+    ax1.plot(prices)
+    # ax1.plot(prices + np.std(prices), color='red')
+    # ax1.plot(prices - np.std(prices), color='red')
+    #sns.lineplot(x=x_rp, y=y_rp + np.std(y_rp), color='b')
+    #sns.lineplot(x=x_rp, y=y_rp + np.std(y_rp), color='b')
 
-tsidx = pd.DatetimeIndex(pd.to_datetime(df['epoch'], unit='s'), 
-dtype='datetime64[ns]', freq='D')
-rp.set_xticklabels(tsidx, rotation=45)
+    ax2.plot(macd, color = 'grey', linewidth = 1.5, label = 'MACD')
+    ax2.plot(signal, color = 'skyblue', linewidth = 1.5, label = 'SIGNAL')
 
-plt.xlabel('')
-plt.ylabel('Price')
+    for i in range(len(prices)):
+        if str(hist[i])[0] == '-':
+            ax2.bar(prices.index[i], hist[i], color = '#ef5350')
+        else:
+            ax2.bar(prices.index[i], hist[i], color = '#26a69a')
+
+    plt.legend(loc = 'lower right')
+
+
+df = get_local_data('BTC-GBP.csv')
+df.head()
+x = df.index
+y = df['close']
+(m, b) = np.polyfit(x, y, 1)
+#(m, b) = np.polyval(x, y, 1)
+print(m, b)
+yp = np.polyval([m, b], x)
+plt.plot(x, yp)
+plt.grid(True)
+plt.scatter(x,y)
 plt.show()
 
 
 
+
+# Test_macd = get_macd(df['close'], 26, 12, 9)
+# Test_macd.tail()
+# plot_macd(df['close'], Test_macd['macd'], Test_macd['signal'], Test_macd['hist'], df)
+# plt.show()
