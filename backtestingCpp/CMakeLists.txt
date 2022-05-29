@@ -9,9 +9,10 @@ find_package(HDF5 REQUIRED COMPONENTS C)
 
 include_directories(${HDF5_INCLUDE_DIRS})
 
-set(SOURCE_FILES main.cpp Database.cpp)
+set(SOURCE_FILES Database.cpp Utils.cpp strategies/Sma.cpp strategies/Psar.cpp)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+#add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} ${HDF5_LIBRARIES} ${HDF5_C_LIBRARIES})
 

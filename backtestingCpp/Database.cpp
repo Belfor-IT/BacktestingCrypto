@@ -17,7 +17,11 @@ Database::Database(const string& file_name)
     h5_file = H5Fopen(FILE_NAME.c_str(), H5F_ACC_RDONLY, fapl);
 
     if (h5_file < 0) {
-        printf("Error while opening %s\n", FILE_NAME.c_str());
+        FILE_NAME = "data/" + file_name + ".h5";
+        h5_file = H5Fopen(FILE_NAME.c_str(), H5F_ACC_RDONLY, fapl);
+        if (h5_file < 0) {
+            printf("Error while opening %s\n", FILE_NAME.c_str());
+        }
     }
 }
 
@@ -26,7 +30,7 @@ void Database::close_file()
     H5Fclose(h5_file);
 }
 
-double** Database::get_data(const string& symbol, const string& exchange)
+double** Database::get_data(const string& symbol, const string& exchange, int& array_size)
 {
     double** results = {};
 
@@ -43,6 +47,8 @@ double** Database::get_data(const string& symbol, const string& exchange)
     hsize_t dims[2];
 
     H5Sget_simple_extent_dims(dspace, dims, NULL);
+
+    array_size = (int)dims[0];
 
     results = new double*[dims[0]];
 
