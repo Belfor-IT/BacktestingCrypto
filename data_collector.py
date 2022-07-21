@@ -9,14 +9,14 @@ from utils import *
 from exchanges.binance import BinanceClient
 from exchanges.ftx import FtxClient
 from exchanges.kucoin import KucoinClient
-from exchanges.coinbase import CoinbaseClient
+# from exchanges.coinbase import CoinbaseClient
 
 
 logger = logging.getLogger()
 
 
 
-def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient, CoinbaseClient], exchange: str, symbol: str):
+def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient], exchange: str, symbol: str):
     h5_db = Hdf5Client(exchange)
     h5_db.create_dataset(symbol)
     client = client
@@ -29,8 +29,8 @@ def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient, CoinbaseCl
         if client.platform == "kucoin":
             data = client.get_historical_data(symbol, end_time=int(time.time()) - 60000)
             print(data)
-        elif client.platform == "coinbase":
-            data = client.get_historical_data(symbol, end_time=datetime.datetime.now().isoformat() - 60000)
+        # elif client.platform == "coinbase":
+        #     data = client.get_historical_data(symbol, end_time=datetime.datetime.now().isoformat() - 60000)
         else:
             data = client.get_historical_data(symbol, end_time=int(time.time() * 1000) - 60000)
 

@@ -6,7 +6,7 @@ from utils import TF_EQUIV
 from exchanges.binance import BinanceClient
 from exchanges.ftx import FtxClient
 from exchanges.kucoin import KucoinClient
-from exchanges.coinbase import CoinbaseClient
+# from exchanges.coinbase import CoinbaseClient
 from data_collector import collect_all
 
 logger = logging.getLogger()
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     while True:
         exchange = input("Choose an exchange: ").lower()
-        if exchange in ["ftx", "binance", "kucoin", "coinbase"]:
+        if exchange in ["ftx", "binance", "kucoin"]:
             break
 
     if exchange == "binance":
@@ -42,8 +42,8 @@ if __name__ == "__main__":
         client = FtxClient()  
     elif exchange == "kucoin":
         client = KucoinClient(False)
-    elif exchange == "coinbase":
-        client = CoinbaseClient()
+    # elif exchange == "coinbase":
+    #     client = CoinbaseClient()
     
         
 

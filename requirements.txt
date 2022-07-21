@@ -1,2 +1,7 @@
-python_dateutil==2.8.2
-requests==2.25.1
+h5py
+matplotlib
+mplfinance
+numpy
+pandas
+python_dateutil
+requests
