@@ -1,1 +1,8 @@
 pipreqs  /path/to/
+install 
+cmake.org 
+MSYS2.org install G++ compiler
+https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-1.12.2/bin/windows/hdf5-1.12.2-Std-win10_64-vs16.zip
+plugins 
+C/C++  in settings zoek naar Cpp standard en selecteer 17
+CMAKE

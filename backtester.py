@@ -1,6 +1,8 @@
+from ctypes import *
+
 from database import Hdf5Client
 
-from utils import resample_timeframe, STRAT_PARAMS
+from utils import resample_timeframe, STRAT_PARAMS, get_library
 import strategies.obv
 import strategies.ichimoku
 import strategies.support_resistance
@@ -28,34 +30,66 @@ def run(exchange: str, symbol: str, strategy: str, tf: str, from_time: int, to_t
         data = h5_db.get_data(symbol, from_time, to_time)
         data = resample_timeframe(data, tf)
 
-        pnl = strategies.obv.backtest(data, ma_period=params["ma_period"])
+        pnl, max_drawdown = strategies.obv.backtest(data, ma_period=params["ma_period"])
     # default 9 as moving average period
         #print(strategies.obv.backtest(data, 9))
 
-        return pnl
+        return pnl, max_drawdown
     
     elif strategy == "ichimoku":
         h5_db = Hdf5Client(exchange)
         data = h5_db.get_data(symbol, from_time, to_time)
         data = resample_timeframe(data, tf)
 
-        pnl = strategies.ichimoku.backtest(data, tenkan_period=params["tenkan"], kijun_period=params["kijun"])
+        pnl, max_drawdown = strategies.ichimoku.backtest(data, tenkan_period=params["tenkan"], kijun_period=params["kijun"])
 
         #print(strategies.ichimoku.backtest(data, tenkan_period=9, kijun_period=26))
-        return pnl
+        return pnl, max_drawdown
 
     elif strategy == "sup_res":
         h5_db = Hdf5Client(exchange)
         data = h5_db.get_data(symbol, from_time, to_time)
         data = resample_timeframe(data, tf)
 
-        pnl = strategies.support_resistance.backtest(data, min_points=params["min_points"],
+        pnl, max_drawdown = strategies.support_resistance.backtest(data, min_points=params["min_points"],
                                                      min_diff_points=params["min_diff_points"],
                                                      rounding_nb=params["rounding_nb"],
                                                      take_profit=params["take_profit"], stop_loss=params["stop_loss"])
         
         #print(strategies.support_resistance.backtest(data, min_points=3, min_diff_points=7, rounding_nb=400,take_profit=3, stop_loss=3))
 
-        return pnl
+        return pnl, max_drawdown
 
-        
+    elif strategy == "sup_res":
+        h5_db = Hdf5Client(exchange)
+        data = h5_db.get_data(symbol, from_time, to_time)
+        data = resample_timeframe(data, tf)
+
+        pnl, max_drawdown = strategies.support_resistance.backtest(data, min_points=params["min_points"],
+                                                                 min_diff_points=params["min_diff_points"],
+                                                                 rounding_nb=params["rounding_nb"],
+                                                     take_profit=params["take_profit"], stop_loss=params["stop_loss"])
+
+        return pnl, max_drawdown
+
+    elif strategy == "sma":
+
+        lib = get_library()
+
+        obj = lib.Sma_new(exchange.encode(), symbol.encode(), tf.encode(), from_time, to_time)
+        lib.Sma_execute_backtest(obj, params["slow_ma"], params["fast_ma"])
+        pnl = lib.Sma_get_pnl(obj)
+        max_drawdown = lib.Sma_get_max_dd(obj)
+
+        return pnl, max_drawdown
+
+    elif strategy == "psar":
+
+        lib = get_library()
+
+        obj = lib.Psar_new(exchange.encode(), symbol.encode(), tf.encode(), from_time, to_time)
+        lib.Psar_execute_backtest(obj, params["initial_acc"], params["acc_increment"], params["max_acc"])
+        pnl = lib.Psar_get_pnl(obj)
+        max_drawdown = lib.Psar_get_max_dd(obj)
+
+        return pnl, max_drawdown

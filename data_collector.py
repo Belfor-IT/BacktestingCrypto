@@ -1,4 +1,4 @@
-from typing import *
+import typing
 import logging
 
 import time
@@ -16,7 +16,7 @@ logger = logging.getLogger()
 
 
 
-def collect_all(client: Union[BinanceClient, FtxClient, KucoinClient], exchange: str, symbol: str):
+def collect_all(client: typing.Union[BinanceClient, FtxClient, KucoinClient], exchange: str, symbol: str):
     h5_db = Hdf5Client(exchange)
     h5_db.create_dataset(symbol)
     client = client

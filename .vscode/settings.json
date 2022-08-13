@@ -1,3 +1,4 @@
 {
-    "jupyter.generateSVGPlots": false
+    "jupyter.generateSVGPlots": false,
+    "cmake.sourceDirectory": "${workspaceFolder}/backtestingCpp"
 }

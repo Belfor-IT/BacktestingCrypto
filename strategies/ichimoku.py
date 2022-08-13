@@ -7,11 +7,11 @@ pd.set_option("display.max_rows", None)
 pd.set_option("display.width", 1000)
 
 
-def backtest(df: pd.DataFrame, tenkan_period: int, kijun_period: int):
+def backtest(df_original: pd.DataFrame, tenkan_period: int, kijun_period: int):
     """
     long signal:
     >tenkan_senkou_a cross kijun_senkou_a upwards
-    >the clpose price is above the ichimoku cloud
+    >the close price is above the ichimoku cloud
     >chikou span is trending upwards
 
     short signal:
@@ -22,7 +22,7 @@ def backtest(df: pd.DataFrame, tenkan_period: int, kijun_period: int):
     tijd om te gaan slapen
 
     """
-
+    df = df_original.copy()
     # Tenkan Sen : Short-term signal line
 
     df["rolling_min_tenkan"] = df["low"].rolling(window=tenkan_period).min()
@@ -79,25 +79,13 @@ def backtest(df: pd.DataFrame, tenkan_period: int, kijun_period: int):
                             (df["prev_tenkan_minus_kijun"] > 0) &
                             (df["close"] < df["senkou_span_a"]) &
                             (df["close"] < df["senkou_span_b"]) &
-                            (df["close"] < df["chikou_span"]), -1, 0))  # -1 = sell, 1 = buy, 0 = not satisfied do nothing
+                            (df["close"] < df["chikou_span"]), -1, np.NaN))  # -1 = sell, 1 = buy, 0 = not satisfied do nothing
+    df = df[df["signal"] != 0].copy()                                 
 
-    signal_data = df[df["signal"] != 0].copy()
-    #shift next candle to calculate the pnl 
-    signal_data["pnl"] = signal_data["close"].pct_change() * signal_data["signal"].shift(1)
+    df["pnl"] = df["close"].pct_change() * df["signal"].shift(1)
 
     df["cum_pnl"] = df["pnl"].cumsum()
     df["max_cum_pnl"] = df["cum_pnl"].cummax()
     df["drawdown"] = df["max_cum_pnl"] - df["cum_pnl"]
 
     return df["pnl"].sum(), df["drawdown"].max()
-
-
-
-
-
-
-
-
-
-
-
